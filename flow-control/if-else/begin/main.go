@@ -8,7 +8,13 @@ import (
 // parseOddsEvens returns two slices, one with the odd numbers and one with the even numbers
 func parseOddsEvens(ints []int) (odds []int, evens []int) {
 	// use a for-range loop to iterate over the incoming slice
-
+	for _, v := range ints {
+		if even:= v % 2 == 0; even {
+			evens = append(evens, v)
+		}else{
+			odds = append(odds, v)
+		}
+	}
 	// use the modulo operator to check if the number is odd or even and add it to the appropriate slice
 	return
 }
