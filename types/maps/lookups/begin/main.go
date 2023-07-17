@@ -17,4 +17,6 @@ func main() {
 	fmt.Println("JR: ", authors["jr"])
 
 	// check when a key is present in the map
+	author, isPresent := authors["jr"]
+	fmt.Printf("%#v - Is present: %v\n", author, isPresent)
 }
