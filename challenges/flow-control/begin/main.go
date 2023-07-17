@@ -20,7 +20,7 @@ func panicHandler(){
 
 func errorValidaror(err error){
 	if err != nil{
-		panic(err)
+		panic(fmt.Errorf("Error wraper: %s", err))
 	}
 }
 func main() {
@@ -42,7 +42,7 @@ func main() {
 	countMap := make(map[string]int)
 
 	// use the standard library utility package that can help us split the string into words
-	words := strings.Split(content, " ")
+	words := strings.Fields(content)
 
 	// capture the length of the words slice
 	countMap["words"] = len(words)
