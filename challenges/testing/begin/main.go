@@ -3,6 +3,10 @@ package main
 
 import "unicode"
 
+type counter interface {
+	count(input string) int
+}
+
 type letterCounter struct{ identifier string }
 
 func (l letterCounter) count(input string) int {
