@@ -3,24 +3,25 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 // sum calculates and prints the sum of numbers
-func sum(nums []int) {
+func sum(nums []int, channel chan <- int) {
 	sum := 0
 	for _, v := range nums {
 		sum += v
 	}
-	fmt.Println("Result:", sum)
+	channel <- sum
 }
 
 func main() {
 	nums := []int{1, 2, 3, 4, 5}
 
+	channel := make(chan int)
 	// invoke the sum function as a goroutine
-	go sum(nums)
+	go sum(nums, channel)
 
 	// force main thread to sleep
-	time.Sleep(100 * time.Millisecond)
+	result:= <- channel
+	fmt.Println(result)
 }
