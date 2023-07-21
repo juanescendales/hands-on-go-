@@ -6,17 +6,12 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
 	"github.com/davecgh/go-spew/spew"
 )
-
-var random *rand.Rand
-
-func init() {
-	random = rand.New(rand.NewSource(time.Now().UnixNano()))
-}
 
 type counter interface {
 	name() string
@@ -31,6 +26,7 @@ func (l letterCounter) name() string {
 
 func (l letterCounter) count(input string) int {
 	result := 0
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 	fmt.Println(l.name(), "working...")
 	time.Sleep(time.Duration(random.Intn(5)) * time.Second)
 	for _, char := range input {
@@ -49,6 +45,7 @@ func (n numberCounter) name() string {
 
 func (n numberCounter) count(input string) int {
 	result := 0
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 	fmt.Println(n.name(), "working...")
 	time.Sleep(time.Duration(random.Intn(5)) * time.Second)
 	for _, char := range input {
@@ -67,6 +64,7 @@ func (s symbolCounter) name() string {
 
 func (s symbolCounter) count(input string) int {
 	result := 0
+	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 	fmt.Println(s.name(), "working...")
 	time.Sleep(time.Duration(random.Intn(5)) * time.Second)
 	for _, char := range input {
@@ -85,10 +83,19 @@ func doAnalysis(data string, counters ...counter) map[string]int {
 	analysis["words"] = len(strings.Fields(data))
 
 	// loop over the counters and use their name as the key
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	wg.Add(len(counters))
+
 	for _, c := range counters {
-		analysis[c.name()] = c.count(data)
+		countTask := countTask{
+			counter: c,
+			input:   data,
+		}
+		go launchCounterTask(countTask, analysis, &wg, &mu)
 	}
 
+	wg.Wait()
 	// return the map
 	return analysis
 }
@@ -119,4 +126,17 @@ func main() {
 
 	// dump the map to the console using the spew package
 	spew.Dump(analysis)
+}
+
+type countTask struct {
+	counter counter
+	input   string
+}
+
+func launchCounterTask(countTask countTask, analysis map[string]int, wg *sync.WaitGroup, mu *sync.Mutex) {
+	defer wg.Done()
+	defer mu.Unlock()
+	countResult := countTask.counter.count(countTask.input)
+	mu.Lock()
+	analysis[countTask.counter.name()] = countResult
 }

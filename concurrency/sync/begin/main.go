@@ -6,8 +6,10 @@ import (
 	"sync"
 )
 
-func lenghtName(name string, lenghtMap map[string]int, wm *sync.WaitGroup) {
+func lenghtName(name string, lenghtMap map[string]int, wm *sync.WaitGroup, mu *sync.Mutex) {
+	mu.Lock()
 	lenghtMap[name] = len(name)
+	mu.Unlock()
 	wm.Done()
 }
 
@@ -20,8 +22,9 @@ func main() {
 	var wm sync.WaitGroup
 	wm.Add(len(names))
 	// launch a goroutine for each name we want to process
+	var mu sync.Mutex
 	for _, name := range names {
-		go lenghtName(name, lenghtMap, &wm)
+		go lenghtName(name, lenghtMap, &wm, &mu)
 	}
 	// wait for all goroutines to finish
 	wm.Wait()
